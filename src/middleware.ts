@@ -7,5 +7,6 @@ export default withAuth({
 });
 
 export const config = {
-    matcher: ["/embro/dash/:path*"],
+    // Esto protege todo en dash EXCEPTO la página de login
+    matcher: ["/embro/dash/((?!login).*)"],
 };
