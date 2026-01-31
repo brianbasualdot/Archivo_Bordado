@@ -21,7 +21,7 @@ export default async function ProductsPage() {
 
                 {/* RIGHT: LISTA DE PRODUCTOS */}
                 <div className="lg:col-span-2">
-                    <ProductList initialProducts={products} />
+                    <ProductList initialProducts={products.map(p => ({ ...p, description: p.description || undefined }))} />
                 </div>
             </div>
         </div>
