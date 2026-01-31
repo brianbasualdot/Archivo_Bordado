@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// NEW: SEO & GLOBAL SETTINGS
+model SiteSettings {
+  id          String   @id @default("global") // Singleton pattern: always use "global"
+  siteTitle   String   @default("Archivo Bordado | Matrices Digitales")
+  description String   @default("Biblioteca de matrices de bordado para producción textil en Argentina.")
+  keywords    String[] @default(["bordado", "matrices", "embroidery", "argentina", "digitalización"])
+  defaultAlt  String   @default("Matriz de bordado digital optimizada - Archivo Bordado")
+  updatedAt   DateTime @updatedAt
+}
+
+model Matrix {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  
+  price       Int      // Price in ARS
+  stitches    Int
+  widthMm     Int
+  heightMm    Int
+  colors      Int      @default(1)
+  
+  formats     String[] // Array of strings: ["DST", "PES"]
+  tags        String[]
+  
+  imageUrl    String   // URL to public image
+  fileUrl     String   // URL to secure .zip file
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  mpPreferenceId  String?     @unique
+  mpPaymentId     String?     @unique
+  status          String      @default("PENDING") // PENDING, APPROVED, REJECTED
+  
+  customerName    String?
+  customerEmail   String
+  
+  total           Int
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  matrixId  String
+  price     Int // Price at moment of purchase
+}
