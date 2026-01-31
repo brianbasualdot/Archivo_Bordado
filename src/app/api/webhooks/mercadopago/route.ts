@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { payment } from '@/lib/mercadopago';
-import { updateOrderStatus } from '@/services/order.service';
+import prisma from '@/lib/prisma';
 import { sendOrderConfirmation } from '@/services/email.service';
 // import { OrderStatus } from '@prisma/client'; // Not using Enum yet
 
@@ -40,7 +40,13 @@ async function handlePayment(paymentId: string) {
             const orderId = paymentData.external_reference;
             if (orderId) {
                 // Update Order Status
-                await updateOrderStatus(orderId, 'APPROVED', paymentId);
+                await prisma.order.update({
+                    where: { id: orderId },
+                    data: {
+                        status: 'APPROVED',
+                        mpPaymentId: paymentId
+                    }
+                });
 
                 // Send Email
                 await sendOrderConfirmation(orderId);
