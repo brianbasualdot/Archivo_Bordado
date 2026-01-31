@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 // Constructing URL from project ref found in pooler URL or requiring env var
 // Project Ref appears to be: zojulnxqfncbtrlkwkkc
 const PROJECT_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zojulnxqfncbtrlkwkkc.supabase.co';
-const SERVICE_KEY = process.env.DATABASE_serviceRoleKEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const SERVICE_KEY = process.env.DATABASE_serviceRoleKEY || process.env.SUPABASE_SERVICE_ROLE_KEY || 'fallback_key_for_build';
 
 if (!SERVICE_KEY) {
     console.error("CRITICAL: Supabase Service Role Key is missing.");
